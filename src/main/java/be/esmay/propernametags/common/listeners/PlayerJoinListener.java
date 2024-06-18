@@ -39,6 +39,7 @@ public final class PlayerJoinListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         if (!this.properNametags.isNameTagVisible()) return;
+        this.properNametags.getQuittingPlayers().asMap().put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
 
         List<ProperNameTag> nameTagsToRemove = this.properNametags.getNameTags().stream()
                 .filter(nameTag -> nameTag.getPlayer().equals(event.getPlayer().getUniqueId()) ||

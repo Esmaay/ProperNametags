@@ -15,6 +15,8 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import lombok.Getter;
@@ -31,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class ProperNametags extends JavaPlugin {
@@ -48,6 +51,11 @@ public final class ProperNametags extends JavaPlugin {
     private DefaultConfiguration defaultConfiguration;
 
     private final AtomicInteger lastEntityId = new AtomicInteger(Integer.MAX_VALUE);
+
+    @Getter
+    private final Cache<UUID, Long> quittingPlayers = CacheBuilder.newBuilder()
+            .expireAfterWrite(2, TimeUnit.SECONDS)
+            .build();
 
     @Getter @Setter
     private boolean nameTagVisible = true;
