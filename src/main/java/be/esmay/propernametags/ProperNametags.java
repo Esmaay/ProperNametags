@@ -17,6 +17,7 @@ import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import lombok.Getter;
+import lombok.Setter;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
@@ -46,6 +47,9 @@ public final class ProperNametags extends JavaPlugin {
     private DefaultConfiguration defaultConfiguration;
 
     private final AtomicInteger lastEntityId = new AtomicInteger(Integer.MAX_VALUE);
+
+    @Getter @Setter
+    private boolean nameTagVisible = true;
 
     public ProperNametags() {
         instance = this;

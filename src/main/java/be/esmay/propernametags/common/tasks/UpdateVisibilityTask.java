@@ -34,6 +34,13 @@ public final class UpdateVisibilityTask implements ISteppingTask {
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             if (player.getUniqueId().equals(viewer.getUniqueId())) continue;
 
+            if (!this.properNametags.isNameTagVisible() && !this.properNametags.getNameTags().isEmpty()) {
+                if (!this.properNametags.hasNameTag(player, viewer)) continue;
+
+                this.properNametags.removeNameTag(player, viewer);
+                continue;
+            }
+
             if (!viewer.canSee(player)) {
                 if (!this.properNametags.hasNameTag(player, viewer)) continue;
 

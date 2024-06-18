@@ -20,6 +20,8 @@ public final class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        if (!this.properNametags.isNameTagVisible()) return;
+
         for (Player player : event.getPlayer().getWorld().getNearbyEntities(event.getPlayer().getLocation(), 48, 48, 48).stream().filter(entity -> entity instanceof Player).map(entity -> (Player) entity).toList()) {
             if (player.getUniqueId().toString().equalsIgnoreCase(event.getPlayer().getUniqueId().toString())) continue;
 
@@ -36,6 +38,8 @@ public final class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
+        if (!this.properNametags.isNameTagVisible()) return;
+
         List<ProperNameTag> nameTagsToRemove = this.properNametags.getNameTags().stream()
                 .filter(nameTag -> nameTag.getPlayer().equals(event.getPlayer().getUniqueId()) ||
                         nameTag.getViewer().equals(event.getPlayer().getUniqueId()))

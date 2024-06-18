@@ -13,6 +13,8 @@ public final class PlayerSneakListener implements Listener {
 
     @EventHandler
     public void onSneak(PlayerToggleSneakEvent event) {
+        if (!this.properNametags.isNameTagVisible()) return;
+
         this.properNametags.getNameTags().stream()
                 .filter(nameTag -> nameTag.getPlayer().equals(event.getPlayer().getUniqueId()))
                 .forEach(nameTag -> this.properNametags.sendMetaData(nameTag, event.isSneaking()));
