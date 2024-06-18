@@ -9,19 +9,16 @@ import java.util.regex.Pattern;
 @UtilityClass
 public final class ChatUtils {
 
-    private final static Pattern PATTERN = Pattern.compile("&#?[a-fA-F0-9]{6}");
+    private final static Pattern PATTERN = Pattern.compile("#[a-fA-F0-9]{6}|&#[a-fA-F0-9]{6}");
 
     public static String format(String message) {
         Matcher match = PATTERN.matcher(message);
 
         while (match.find()) {
             String color = message.substring(match.start(), match.end());
+            String actualColour = color.startsWith("&#") ? color.substring(1) : color;
 
-            if (color.startsWith("&#")) {
-                color = "#" + color.substring(2);
-            }
-
-            message = message.replace(color, ChatColor.of(color) + "");
+            message = message.replace(color, ChatColor.of(actualColour) + "");
             match = PATTERN.matcher(message);
         }
 

@@ -4,6 +4,7 @@ import be.esmay.propernametags.api.configuration.DefaultConfiguration;
 import be.esmay.propernametags.common.listeners.PlayerJoinListener;
 import be.esmay.propernametags.common.listeners.PlayerSneakListener;
 import be.esmay.propernametags.api.objects.ProperNameTag;
+import be.esmay.propernametags.common.tasks.UpdateNameTask;
 import be.esmay.propernametags.common.tasks.UpdateVisibilityTask;
 import be.esmay.propernametags.utils.ChatUtils;
 import be.esmay.propernametags.utils.task.SteppingTaskRegistry;
@@ -67,6 +68,7 @@ public final class ProperNametags extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new PlayerSneakListener(this), this);
 
         SteppingTaskRegistry.register(new UpdateVisibilityTask(this));
+        new UpdateNameTask(this).runTaskTimer(this, 0L, this.defaultConfiguration.getUpdateInterval());
 
         Bukkit.getScoreboardManager().getMainScoreboard().getTeams().forEach(team -> {
             team.setOption(org.bukkit.scoreboard.Team.Option.NAME_TAG_VISIBILITY, org.bukkit.scoreboard.Team.OptionStatus.NEVER);
@@ -107,6 +109,30 @@ public final class ProperNametags extends JavaPlugin {
         return this.createMetaData(Bukkit.getPlayer(nameTag.getPlayer()), Bukkit.getPlayer(nameTag.getViewer()), sneaking, nameTag.getEntityId());
     }
 
+    public PacketContainer createNameUpdate(ProperNameTag nameTag) {
+        PacketContainer metadataPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
+        metadataPacket.getIntegers().write(0, nameTag.getEntityId());
+
+        Player player = Bukkit.getPlayer(nameTag.getPlayer());
+        if (player == null) return null;
+
+        String tag = this.defaultConfiguration.getPrefix() + this.getDefaultConfiguration().getName() + this.defaultConfiguration.getSuffix();
+        tag = tag.replaceAll("%player%", player.getName());
+
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            tag = PlaceholderAPI.setPlaceholders(player, tag);
+        }
+
+        tag = ChatUtils.format(tag);
+
+        List<WrappedDataValue> values = Lists.newArrayList(
+                new WrappedDataValue(2, WrappedDataWatcher.Registry.getChatComponentSerializer(true), Optional.of(WrappedChatComponent.fromLegacyText(tag).getHandle()))
+        );
+
+        metadataPacket.getDataValueCollectionModifier().write(0, values);
+        return metadataPacket;
+    }
+
     public PacketContainer createMetaData(Player player, Player viewer, boolean sneaking, Integer entityId) {
         if (entityId == null) {
             ProperNameTag nameTag = this.nameTags.stream().filter(tag -> tag.getPlayer().equals(player.getUniqueId()) && tag.getViewer().equals(viewer.getUniqueId())).findFirst().orElse(null);
@@ -145,6 +171,11 @@ public final class ProperNametags extends JavaPlugin {
 
     public void sendMetaData(ProperNameTag nameTag, boolean sneaking) {
         PacketContainer packetContainer = this.createMetaData(nameTag, sneaking);
+        this.protocolManager.sendServerPacket(Bukkit.getPlayer(nameTag.getViewer()), packetContainer);
+    }
+
+    public void sendNameUpdate(ProperNameTag nameTag) {
+        PacketContainer packetContainer = this.createNameUpdate(nameTag);
         this.protocolManager.sendServerPacket(Bukkit.getPlayer(nameTag.getViewer()), packetContainer);
     }
 
