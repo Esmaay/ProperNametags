@@ -1,0 +1,9 @@
+name: ProperNametags
+version: '${project.version}'
+main: be.esmay.propernametags.ProperNametags
+api-version: '1.20'
+depend:
+  - ProtocolLib
+softdepend:
+  - TAB
+  - PlaceholderAPI
