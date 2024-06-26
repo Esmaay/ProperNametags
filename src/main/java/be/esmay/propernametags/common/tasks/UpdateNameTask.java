@@ -17,6 +17,7 @@ public final class UpdateNameTask extends BukkitRunnable {
         for (ProperNameTag nameTag : this.properNametags.getNameTags()) {
             Player player = Bukkit.getPlayer(nameTag.getPlayer());
             if (player == null) continue;
+            if (player.hasMetadata("NPC")) continue;
 
             this.properNametags.sendNameUpdate(nameTag);
         }

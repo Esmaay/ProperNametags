@@ -31,8 +31,14 @@ public final class UpdateVisibilityTask implements ISteppingTask {
             return;
         }
 
+        if (player.hasMetadata("NPC")) {
+            this.currentlyChecking[this.index++] = null;
+            return;
+        }
+
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             if (player.getUniqueId().equals(viewer.getUniqueId())) continue;
+            if (viewer.hasMetadata("NPC")) continue;
 
             if (!this.properNametags.isNameTagVisible() && !this.properNametags.getNameTags().isEmpty()) {
                 if (!this.properNametags.hasNameTag(player, viewer)) continue;
@@ -42,6 +48,13 @@ public final class UpdateVisibilityTask implements ISteppingTask {
             }
 
             if (!viewer.canSee(player)) {
+                if (!this.properNametags.hasNameTag(player, viewer)) continue;
+
+                this.properNametags.removeNameTag(player, viewer);
+                continue;
+            }
+
+            if (!player.getWorld().getName().equals(viewer.getWorld().getName())) {
                 if (!this.properNametags.hasNameTag(player, viewer)) continue;
 
                 this.properNametags.removeNameTag(player, viewer);

@@ -24,6 +24,7 @@ public final class PlayerJoinListener implements Listener {
 
         for (Player player : event.getPlayer().getWorld().getNearbyEntities(event.getPlayer().getLocation(), 48, 48, 48).stream().filter(entity -> entity instanceof Player).map(entity -> (Player) entity).toList()) {
             if (player.getUniqueId().toString().equalsIgnoreCase(event.getPlayer().getUniqueId().toString())) continue;
+            if (player.hasMetadata("NPC")) continue;
 
             this.properNametags.sendNameTag(event.getPlayer(), player, true);
             this.properNametags.sendNameTag(player, event.getPlayer(), true);
