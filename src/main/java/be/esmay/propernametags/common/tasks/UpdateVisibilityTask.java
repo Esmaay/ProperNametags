@@ -72,7 +72,8 @@ public final class UpdateVisibilityTask implements ISteppingTask {
             if (this.properNametags.getQuittingPlayers().asMap().containsKey(player.getUniqueId())) continue;
             if (this.properNametags.getQuittingPlayers().asMap().containsKey(viewer.getUniqueId())) continue;
 
-            this.properNametags.sendNameTag(player, viewer, false);
+            this.properNametags.sendNameTag(player, viewer, this.properNametags.getTeleportingPlayers().asMap().containsKey(player.getUniqueId()));
+            this.properNametags.getTeleportingPlayers().asMap().remove(player.getUniqueId());
         }
 
         this.currentlyChecking[this.index++] = null;

@@ -4,6 +4,7 @@ import be.esmay.propernametags.api.configuration.DefaultConfiguration;
 import be.esmay.propernametags.common.listeners.PlayerJoinListener;
 import be.esmay.propernametags.common.listeners.PlayerSneakListener;
 import be.esmay.propernametags.api.objects.ProperNameTag;
+import be.esmay.propernametags.common.listeners.PlayerTeleportListener;
 import be.esmay.propernametags.common.tasks.UpdateNameTask;
 import be.esmay.propernametags.common.tasks.UpdateVisibilityTask;
 import be.esmay.propernametags.utils.ChatUtils;
@@ -57,6 +58,11 @@ public final class ProperNametags extends JavaPlugin {
             .expireAfterWrite(2, TimeUnit.SECONDS)
             .build();
 
+    @Getter
+    private final Cache<UUID, Long> teleportingPlayers = CacheBuilder.newBuilder()
+            .expireAfterWrite(2, TimeUnit.SECONDS)
+            .build();
+
     @Getter @Setter
     private boolean nameTagVisible = true;
 
@@ -74,6 +80,7 @@ public final class ProperNametags extends JavaPlugin {
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         this.getServer().getPluginManager().registerEvents(new PlayerSneakListener(this), this);
+        this.getServer().getPluginManager().registerEvents(new PlayerTeleportListener(this), this);
 
         SteppingTaskRegistry.register(new UpdateVisibilityTask(this));
         new UpdateNameTask(this).runTaskTimer(this, 0L, this.defaultConfiguration.getUpdateInterval());
