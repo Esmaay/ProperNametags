@@ -14,6 +14,8 @@ public final class UpdateNameTask extends BukkitRunnable {
 
     @Override
     public void run() {
+        if (!this.properNametags.isNameTagVisible()) return;
+
         for (ProperNameTag nameTag : this.properNametags.getNameTags()) {
             Player player = Bukkit.getPlayer(nameTag.getPlayer());
             if (player == null) continue;
