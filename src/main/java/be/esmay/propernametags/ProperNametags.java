@@ -5,6 +5,7 @@ import be.esmay.propernametags.common.listeners.PlayerJoinListener;
 import be.esmay.propernametags.common.listeners.PlayerSneakListener;
 import be.esmay.propernametags.api.objects.ProperNameTag;
 import be.esmay.propernametags.common.listeners.PlayerTeleportListener;
+import be.esmay.propernametags.common.tasks.MountNametagTask;
 import be.esmay.propernametags.common.tasks.UpdateNameTask;
 import be.esmay.propernametags.common.tasks.UpdateVisibilityTask;
 import be.esmay.propernametags.utils.ChatUtils;
@@ -84,6 +85,7 @@ public final class ProperNametags extends JavaPlugin {
 
         SteppingTaskRegistry.register(new UpdateVisibilityTask(this));
         new UpdateNameTask(this).runTaskTimer(this, 0L, this.defaultConfiguration.getUpdateInterval());
+        new MountNametagTask(this).runTaskTimer(this, 0L, 5L);
 
         Bukkit.getScoreboardManager().getMainScoreboard().getTeams().forEach(team -> {
             team.setOption(org.bukkit.scoreboard.Team.Option.NAME_TAG_VISIBILITY, org.bukkit.scoreboard.Team.OptionStatus.NEVER);
@@ -106,18 +108,27 @@ public final class ProperNametags extends JavaPlugin {
                 .write(1, player.getLocation().getY() + 1.8)
                 .write(2, player.getLocation().getZ());
 
-        PacketContainer packetContainer = new PacketContainer(PacketType.Play.Server.MOUNT);
-        packetContainer.getIntegers().write(0, player.getEntityId());
-        packetContainer.getIntegerArrays().write(0, new int[]{entityId});
-
         PacketContainer sneakPacket = this.createMetaData(player, viewer, player.isSneaking(), entityId);
 
         this.protocolManager.sendServerPacket(viewer, spawnEntityPacket);
         this.sendMetaData(viewer, sneakPacket);
 
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            this.protocolManager.sendServerPacket(viewer, packetContainer);
-        }, isLogin ? 7L : 2L);
+        Bukkit.getScheduler().runTaskLater(this, () -> this.sendMountNameTag(nameTag), isLogin ? 7L : 2L);
+    }
+
+    public void sendMountNameTag(ProperNameTag nameTag) {
+        Player player = Bukkit.getPlayer(nameTag.getPlayer());
+        Player viewer = Bukkit.getPlayer(nameTag.getViewer());
+        if (player == null) return;
+        if (viewer == null) return;
+
+        int entityId = nameTag.getEntityId();
+
+        PacketContainer packetContainer = new PacketContainer(PacketType.Play.Server.MOUNT);
+        packetContainer.getIntegers().write(0, player.getEntityId());
+        packetContainer.getIntegerArrays().write(0, new int[]{entityId});
+
+        this.protocolManager.sendServerPacket(viewer, packetContainer);
     }
 
     public PacketContainer createMetaData(ProperNameTag nameTag, boolean sneaking) {
