@@ -1,6 +1,7 @@
 package be.esmay.propernametags;
 
 import be.esmay.propernametags.api.configuration.DefaultConfiguration;
+import be.esmay.propernametags.commands.ProperNametagsCommand;
 import be.esmay.propernametags.common.listeners.PlayerJoinListener;
 import be.esmay.propernametags.common.listeners.PlayerSneakListener;
 import be.esmay.propernametags.api.objects.ProperNameTag;
@@ -24,6 +25,10 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import lombok.Getter;
 import lombok.Setter;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -32,6 +37,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -49,7 +55,7 @@ public final class ProperNametags extends JavaPlugin {
     @Getter
     private final Set<ProperNameTag> nameTags = new HashSet<>();
 
-    @Getter
+    @Getter @Setter
     private DefaultConfiguration defaultConfiguration;
 
     private final AtomicInteger lastEntityId = new AtomicInteger(Integer.MAX_VALUE);
@@ -82,6 +88,8 @@ public final class ProperNametags extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         this.getServer().getPluginManager().registerEvents(new PlayerSneakListener(this), this);
         this.getServer().getPluginManager().registerEvents(new PlayerTeleportListener(this), this);
+
+        getCommand("propernametags").setExecutor(new ProperNametagsCommand(this));
 
         SteppingTaskRegistry.register(new UpdateVisibilityTask(this));
         new UpdateNameTask(this).runTaskTimer(this, 0L, this.defaultConfiguration.getUpdateInterval());
@@ -149,10 +157,12 @@ public final class ProperNametags extends JavaPlugin {
             tag = PlaceholderAPI.setPlaceholders(player, tag);
         }
 
-        tag = ChatUtils.format(tag);
+        Component tagComponent = ChatUtils.format(tag);
+        String json = GsonComponentSerializer.gson().serialize(tagComponent);
+        WrappedChatComponent component = WrappedChatComponent.fromJson(json);
 
         List<WrappedDataValue> values = Lists.newArrayList(
-                new WrappedDataValue(2, WrappedDataWatcher.Registry.getChatComponentSerializer(true), Optional.of(WrappedChatComponent.fromLegacyText(tag).getHandle()))
+                new WrappedDataValue(2, WrappedDataWatcher.Registry.getChatComponentSerializer(true), Optional.of(component.getHandle()))
         );
 
         metadataPacket.getDataValueCollectionModifier().write(0, values);
@@ -177,11 +187,13 @@ public final class ProperNametags extends JavaPlugin {
             tag = PlaceholderAPI.setPlaceholders(player, tag);
         }
 
-        tag = ChatUtils.format(tag);
+        Component tagComponent = ChatUtils.format(tag);
+        String json = GsonComponentSerializer.gson().serialize(tagComponent);
+        WrappedChatComponent component = WrappedChatComponent.fromJson(json);
 
         List<WrappedDataValue> values = Lists.newArrayList(
                 new WrappedDataValue(0, WrappedDataWatcher.Registry.get(Byte.class), sneaking ? (byte) 0x02 | 0x20 : (byte) 32),
-                new WrappedDataValue(2, WrappedDataWatcher.Registry.getChatComponentSerializer(true), Optional.of(WrappedChatComponent.fromLegacyText(tag).getHandle())),
+                new WrappedDataValue(2, WrappedDataWatcher.Registry.getChatComponentSerializer(true), Optional.of(component.getHandle())),
                 new WrappedDataValue(3, WrappedDataWatcher.Registry.get(Boolean.class), true),
                 new WrappedDataValue(15, WrappedDataWatcher.Registry.get(Byte.class), (byte) 16)
         );

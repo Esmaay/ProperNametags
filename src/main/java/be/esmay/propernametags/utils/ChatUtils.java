@@ -1,6 +1,11 @@
 package be.esmay.propernametags.utils;
 
 import lombok.experimental.UtilityClass;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.md_5.bungee.api.ChatColor;
 
 import java.util.regex.Matcher;
@@ -11,18 +16,17 @@ public final class ChatUtils {
 
     private final static Pattern PATTERN = Pattern.compile("#[a-fA-F0-9]{6}|&#[a-fA-F0-9]{6}");
 
-    public static String format(String message) {
-        Matcher match = PATTERN.matcher(message);
+    public static Component format(String message) {
+        MiniMessage extendedInstance = MiniMessage.builder()
+                .editTags(tags -> {
+                    tags.resolver(TagResolver.resolver("primary", Tag.styling(TextColor.fromHexString("#81ACF1"))));
+                    tags.resolver(TagResolver.resolver("secondary", Tag.styling(TextColor.fromHexString("#4888F3"))));
+                    tags.resolver(TagResolver.resolver("error", Tag.styling(TextColor.fromHexString("#FC3838"))));
+                    tags.resolver(TagResolver.resolver("primary_red", Tag.styling(TextColor.fromHexString("#FF7171"))));
+                    tags.resolver(TagResolver.resolver("secondary_red", Tag.styling(TextColor.fromHexString("#FF4343"))));
+                }).build();
 
-        while (match.find()) {
-            String color = message.substring(match.start(), match.end());
-            String actualColour = color.startsWith("&#") ? color.substring(1) : color;
-
-            message = message.replace(color, ChatColor.of(actualColour) + "");
-            match = PATTERN.matcher(message);
-        }
-
-        return ChatColor.translateAlternateColorCodes('&', message);
+        return extendedInstance.deserialize(message);
     }
 
 }

@@ -7,3 +7,5 @@ depend:
 softdepend:
   - TAB
   - PlaceholderAPI
+commands:
+  propernametags:
