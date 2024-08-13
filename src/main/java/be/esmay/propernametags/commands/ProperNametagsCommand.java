@@ -17,7 +17,12 @@ public final class ProperNametagsCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (args.length == 0) {
-            commandSender.sendMessage(ChatUtils.format("<red>Hey! Gerbuik /propernametags reload jij!"));
+            commandSender.sendMessage(ChatUtils.format("<red>Hey! Gebruik /propernametags reload jij!"));
+            return true;
+        }
+
+        if (!commandSender.hasPermission("propernametags.reload")) {
+            commandSender.sendMessage(ChatUtils.format("<red>foei stout af plaats."));
             return true;
         }
 
