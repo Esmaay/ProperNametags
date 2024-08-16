@@ -3,7 +3,7 @@ version: '${project.version}'
 main: be.esmay.propernametags.ProperNametags
 api-version: '1.20'
 depend:
-  - ProtocolLib
+  - packetevents
 softdepend:
   - TAB
   - PlaceholderAPI
