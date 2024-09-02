@@ -5,6 +5,7 @@ import be.esmay.propernametags.utils.task.ISteppingTask;
 import be.esmay.propernametags.utils.task.StepInfo;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
 
@@ -48,6 +49,13 @@ public final class UpdateVisibilityTask implements ISteppingTask {
             }
 
             if (!viewer.canSee(player)) {
+                if (!this.properNametags.hasNameTag(player, viewer)) continue;
+
+                this.properNametags.removeNameTag(player, viewer);
+                continue;
+            }
+
+            if (player.getGameMode() == GameMode.SPECTATOR) {
                 if (!this.properNametags.hasNameTag(player, viewer)) continue;
 
                 this.properNametags.removeNameTag(player, viewer);
